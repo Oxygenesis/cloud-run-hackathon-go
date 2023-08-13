@@ -45,8 +45,52 @@ func play(input ArenaUpdate) (response string) {
 	log.Printf("IN: %#v", input)
 
 	commands := []string{"F", "R", "L", "T"}
-	rand := rand2.Intn(4)
-	
-	// TODO add your implementation here to replace the random response
-	return commands[rand]
+
+	// Assuming player's id is "self" and opponent's id is "opponent"
+	self, ok1 := input.Arena.State["self"]
+	opponent, ok2 := input.Arena.State["opponent"]
+
+	if !ok1 || !ok2 {
+		// If we don't find either of the players, take a random action
+		return commands[rand2.Intn(4)]
+	}
+
+	// Check if opponent is in our direct line of sight and close enough
+	switch self.Direction {
+	case "N":
+		if opponent.Y < self.Y && self.X == opponent.X {
+			return "T"
+		}
+	case "S":
+		if opponent.Y > self.Y && self.X == opponent.X {
+			return "T"
+		}
+	case "E":
+		if opponent.X > self.X && self.Y == opponent.Y {
+			return "T"
+		}
+	case "W":
+		if opponent.X < self.X && self.Y == opponent.Y {
+			return "T"
+		}
+	}
+
+	// Check if opponent is to our immediate right or left
+	// Only turning, not targeting immediately for simplicity
+	if self.Y == opponent.Y {
+		if self.X < opponent.X {
+			return "R"
+		} else {
+			return "L"
+		}
+	} else if self.X == opponent.X {
+		if self.Y < opponent.Y {
+			return "R"
+		} else {
+			return "L"
+		}
+	}
+
+	// If none of the conditions above are met, move forward
+	return "F"
 }
